@@ -1,3 +1,7 @@
+N.B., this fork uses boto3. You will also need createrepo installed from yum
+
+---
+
 # rpm-s3
 
 This small tool allows you to maintain YUM repositories of RPM packages on S3. The code is largely derived from [s3yum-updater](https://github.com/rockpack/s3yum-updater).
