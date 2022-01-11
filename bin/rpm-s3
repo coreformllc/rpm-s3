@@ -4,7 +4,7 @@
 import os
 import sys
 import time
-import urllib.parse
+import urlparse
 import tempfile
 import shutil
 import optparse
@@ -24,8 +24,8 @@ sys.path.insert(1, os.path.join(lib_root, "vendor/createrepo"))
 import createrepo
 
 # Hack for creating s3 urls
-urllib.parse.uses_relative.append('s3')
-urllib.parse.uses_netloc.append('s3')
+urlparse.uses_relative.append('s3')
+urlparse.uses_netloc.append('s3')
 
 
 class LoggerCallback(object):
@@ -41,7 +41,7 @@ class LoggerCallback(object):
 class S3Grabber(object):
     def __init__(self, baseurl, visibility, host):
         logging.info('S3Grabber: %s', baseurl)
-        base = urllib.parse.urlsplit(baseurl)
+        base = urlparse.urlsplit(baseurl)
         self.baseurl = baseurl
         self.basepath = base.path.lstrip('/')
         self.bucket = getclient(base, host)
@@ -94,12 +94,12 @@ class S3Grabber(object):
 class FileGrabber(object):
     def __init__(self, baseurl):
         logging.info('FileGrabber: %s', baseurl)
-        self.basepath = urllib.parse.urlsplit(baseurl).path
+        self.basepath = urlparse.urlsplit(baseurl).path
         logging.info('basepath: %s', self.basepath)
 
     def urlgrab(self, url, filename, **kwargs):
         """Expects url of the form: file:///path/to/file"""
-        filepath = urllib.parse.urlsplit(url).path
+        filepath = urlparse.urlsplit(url).path
         realfilename = os.path.join(self.basepath, filepath)
         logging.info('fetching: %s', realfilename)
         # The filename name is REALLY important for createrepo as it derives
@@ -127,8 +127,8 @@ def sign(rpmfile):
         child.expect('Enter pass phrase: ')
         child.sendline('')
         child.expect(pexpect.EOF)
-    except pexpect.EOF as e:
-        print("Unable to sign package '%s' - %s" % (rpmfile, child.before))
+    except pexpect.EOF, e:
+        print "Unable to sign package '%s' - %s" % (rpmfile, child.before)
         logging.error("Unable to sign package: %s", e)
         exit(1)
 
@@ -139,8 +139,8 @@ def sign_metadata(repomdfile):
     try:
         subprocess.check_call(cmd)
         logging.info("Successfully signed repository metadata file")
-    except subprocess.CalledProcessError as e:
-        print("Unable to sign repository metadata '%s'" % (repomdfile))
+    except subprocess.CalledProcessError, e:
+        print "Unable to sign repository metadata '%s'" % (repomdfile)
         logging.error("Unable to sign repository metadata: %s", e)
         exit(1)
 
@@ -157,7 +157,7 @@ def setup_repository(repo, repopath):
 def update_repodata(repopath, rpmfiles, options):
     logging.info('rpmfiles: %s', rpmfiles)
     tmpdir = tempfile.mkdtemp()
-    s3base = urllib.parse.urlunsplit(('s3', options.bucket, repopath, '', ''))
+    s3base = urlparse.urlunsplit(('s3', options.bucket, repopath, '', ''))
     s3grabber = S3Grabber(s3base, options.visibility, options.host)
     filegrabber = FileGrabber("file://" + os.getcwd())
 
