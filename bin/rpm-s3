@@ -27,7 +27,7 @@ import createrepo
 urlparse.uses_relative.append('s3')
 urlparse.uses_netloc.append('s3')
 
-logging.getLogger('botocore').setLevel(logging.Debug)
+logging.getLogger('botocore').setLevel(logging.DEBUG)
 
 
 class LoggerCallback(object):
